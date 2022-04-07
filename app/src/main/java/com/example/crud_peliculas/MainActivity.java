@@ -1,20 +1,41 @@
 package com.example.crud_peliculas;
 
+
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
+import android.content.Intent;
 import android.view.View;
-import android.widget.EditText;
-
-import com.example.crud_peliculas.datos.Pelicula;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
-    EditText txtTitulo, txtDesc, txtYear, txtRate;
+
+    Button registerBtn, loginBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initializeViews();
+
+        registerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, Registration.class);
+                startActivity(intent);
+            }
+        });
+        loginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, Login.class);
+                startActivity(intent);
+            }
+        });
     }
 
-
+    private void initializeViews() {
+        registerBtn = findViewById(R.id.register);
+        loginBtn = findViewById(R.id.login);
+    }
 }
