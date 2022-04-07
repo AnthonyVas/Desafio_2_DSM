@@ -1,111 +1,143 @@
 package com.example.crud_peliculas;
 
-import android.content.ContentResolver;
-import android.content.Context;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.slice.Slice;
-import androidx.slice.SliceProvider;
-import androidx.slice.builders.ListBuilder;
-import androidx.slice.builders.ListBuilder.RowBuilder;
-import androidx.slice.builders.SliceAction;
+import androidx.appcompat.app.AppCompatActivity;
+import com.example.crud_peliculas.datos.Pelicula;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
-public class Peliculas extends SliceProvider {
-    /**
-     * Instantiate any required objects. Return true if the provider was successfully created,
-     * false otherwise.
-     */
+import java.util.ArrayList;
+import java.util.List;
+
+public class Peliculas extends AppCompatActivity {
+    public static FirebaseDatabase database = FirebaseDatabase.getInstance();
+    public static DatabaseReference refPeliculas = database.getReference("peliculas");
+
+    // Ordenamiento
+    Query consultaOrdenada = refPeliculas.orderByChild("nombre");
+
+    List<Pelicula> peliculas;
+    ListView listaPersonas;
+
+
     @Override
-    public boolean onCreateSliceProvider() {
-        return true;
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.peliculas);
+
+        inicializar();
+
     }
 
-    /**
-     * Converts URL to content URI (i.e. content://com.example.crud_peliculas...)
-     */
-    @Override
-    @NonNull
-    public Uri onMapIntentToUri(@Nullable Intent intent) {
-        // Note: implementing this is only required if you plan on catching URL requests.
-        // This is an example solution.
-        Uri.Builder uriBuilder = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT);
-        if (intent == null) return uriBuilder.build();
-        Uri data = intent.getData();
-        if (data != null && data.getPath() != null) {
-            String path = data.getPath().replace("/", "");
-            uriBuilder = uriBuilder.path(path);
-        }
-        Context context = getContext();
-        if (context != null) {
-            uriBuilder = uriBuilder.authority(context.getPackageName());
-        }
-        return uriBuilder.build();
+    private void inicializar() {
+        FloatingActionButton fab_agregar= findViewById(R.id.fab_agregar);
+        listaPersonas = findViewById(R.id.ListaPersonas);
+
+        // Cuando el usuario haga clic en la lista (para editar registro)
+        listaPersonas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(getBaseContext(), AgregarPelicula.class);
+
+                intent.putExtra("accion","e"); // Editar
+                intent.putExtra("key", peliculas.get(i).getKey());
+                intent.putExtra("titulo",peliculas.get(i).getTitulo());
+                intent.putExtra("desc",peliculas.get(i).getDesc());
+                intent.putExtra("year",peliculas.get(i).getYear());
+                intent.putExtra("rate",peliculas.get(i).getRate());
+
+                startActivity(intent);
+            }
+        });
+
+        // Cuando el usuario hace un LongClic (clic sin soltar elemento por mas de 2 segundos)
+        // Es por que el usuario quiere eliminar el registro
+        listaPersonas.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int position, long l) {
+
+                // Preparando cuadro de dialogo para preguntar al usuario
+                // Si esta seguro de eliminar o no el registro
+                AlertDialog.Builder ad = new AlertDialog.Builder(Peliculas.this);
+                ad.setMessage("Está seguro de eliminar registro?")
+                        .setTitle("Confirmación");
+
+                ad.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Peliculas.refPeliculas
+                                .child(peliculas.get(position).getKey()).removeValue();
+
+                        Toast.makeText(Peliculas.this,
+                                "Registro borrado!",Toast.LENGTH_SHORT).show();
+                    }
+                });
+                ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Toast.makeText(Peliculas.this,
+                                "Operación de borrado cancelada!",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                ad.show();
+                return true;
+            }
+        });
+
+        fab_agregar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Cuando el usuario quiere agregar un nuevo registro
+                Intent i = new Intent(getBaseContext(), AgregarPelicula.class);
+                i.putExtra("accion","a"); // Agregar
+                i.putExtra("key","");
+                i.putExtra("titulo","");
+                i.putExtra("desc","");
+                i.putExtra("year","");
+                i.putExtra("rate","");
+
+                startActivity(i);
+            }
+        });
+
+        peliculas = new ArrayList<>();
+
+        // Cambiarlo refProductos a consultaOrdenada para ordenar lista
+        consultaOrdenada.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Procedimiento que se ejecuta cuando hubo algun cambio
+                // en la base de datos
+                // Se actualiza la coleccion de personas
+                peliculas.removeAll(peliculas);
+                for (DataSnapshot dato : dataSnapshot.getChildren()) {
+                    Pelicula pelicula = dato.getValue(Pelicula.class);
+                    pelicula.setKey(dato.getKey());
+                    peliculas.add(pelicula);
+                }
+
+                ListarPeliculas adapter = new ListarPeliculas(Peliculas.this,
+                        peliculas );
+                listaPersonas.setAdapter(adapter);
+
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
     }
 
-    /**
-     * Construct the Slice and bind data if available.
-     */
-    public Slice onBindSlice(Uri sliceUri) {
-        Context context = getContext();
-        SliceAction activityAction = createActivityAction();
-        if (context == null || activityAction == null) {
-            return null;
-        }
-        if ("/".equals(sliceUri.getPath())) {
-            // Path recognized. Customize the Slice using the androidx.slice.builders API.
-            // Note: ANRs and strict mode is enforced here so don"t do any heavy operations.
-            // Only bind data that is currently available in memory.
-            return new ListBuilder(getContext(), sliceUri, ListBuilder.INFINITY)
-                    .addRow(
-                            new RowBuilder()
-                                    .setTitle("URI found.")
-                                    .setPrimaryAction(activityAction)
-                    )
-                    .build();
-        } else {
-            // Error: Path not found.
-            return new ListBuilder(getContext(), sliceUri, ListBuilder.INFINITY)
-                    .addRow(
-                            new RowBuilder()
-                                    .setTitle("URI not found.")
-                                    .setPrimaryAction(activityAction)
-                    )
-                    .build();
-        }
-    }
-
-    private SliceAction createActivityAction() {
-        return null;
-        //Instead of returning null, you should create a SliceAction. Here is an example:
-        /*
-        return SliceAction.create(
-            PendingIntent.getActivity(
-                getContext(), 0, new Intent(getContext(), MyActivityClass.class), 0
-            ),
-            IconCompat.createWithResource(getContext(), R.drawable.ic_launcher_foreground),
-            ListBuilder.ICON_IMAGE,
-            "Open App"
-        );
-        */
-    }
-
-    /**
-     * Slice has been pinned to external process. Subscribe to data source if necessary.
-     */
-    @Override
-    public void onSlicePinned(Uri sliceUri) {
-        // When data is received, call context.contentResolver.notifyChange(sliceUri, null) to
-        // trigger Peliculas#onBindSlice(Uri) again.
-    }
-
-    /**
-     * Unsubscribe from data source if necessary.
-     */
-    @Override
-    public void onSliceUnpinned(Uri sliceUri) {
-        // Remove any observers if necessary to avoid memory leaks.
-    }
 }

@@ -8,32 +8,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CRUD_Peliculas">
-        <provider
-            android:name=".Peliculas"
-            android:authorities="com.example.crud_peliculas"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+        android:theme="@style/Theme.AppCompat.Light">
+        <activity android:name=".MainActivity">
 
-                <category android:name="android.app.slice.category.SLICE" />
-
-                <data
-                    android:host="crud_peliculas.example.com"
-                    android:pathPrefix="/"
-                    android:scheme="http" />
-            </intent-filter>
-        </provider>
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+        </activity>
+        <activity android:name=".Peliculas" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".AgregarPelicula"/>
     </application>
 
 </manifest>
