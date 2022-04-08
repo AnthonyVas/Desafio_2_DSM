@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class Login extends AppCompatActivity {
 
     private EditText emailTV, passwordTV;
-    private Button loginBtn;
+    private Button loginBtn, registerBtn, resetBtn;
     private ProgressBar progressBar;
 
     private FirebaseAuth mAuth;
@@ -38,8 +39,28 @@ public class Login extends AppCompatActivity {
                 loginUserAccount();
             }
         });
-    }
 
+        registerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                registreUserEvent();
+            }
+        });
+        resetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetPass();
+            }
+        });
+    }
+    private void registreUserEvent(){
+        Intent intent = new Intent(getBaseContext(), Registration.class);
+        startActivity(intent);
+    }
+    private void resetPass(){
+        Intent intent = new Intent(getBaseContext(), ResetPass.class);
+        startActivity(intent);
+    }
     private void loginUserAccount() {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -48,11 +69,11 @@ public class Login extends AppCompatActivity {
         password = passwordTV.getText().toString();
 
         if (TextUtils.isEmpty(email)) {
-            Toast.makeText(getApplicationContext(), "Please enter email...", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Ingresa un correo", Toast.LENGTH_LONG).show();
             return;
         }
         if (TextUtils.isEmpty(password)) {
-            Toast.makeText(getApplicationContext(), "Please enter password!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Ingresa una contrasena!", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -64,7 +85,7 @@ public class Login extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(View.GONE);
 
-                            Intent intent = new Intent(Login.this, Peliculas.class);
+                            Intent intent = new Intent(getBaseContext(), Peliculas.class);
                             startActivity(intent);
                         }
                         else {
@@ -72,7 +93,13 @@ public class Login extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                         }
                     }
-                });
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+        //                loadingBar.dismiss();
+                        Toast.makeText(Login.this,e.toString(),Toast.LENGTH_LONG).show();
+                    }
+        });;
     }
 
     private void initializeUI() {
@@ -80,6 +107,8 @@ public class Login extends AppCompatActivity {
         passwordTV = findViewById(R.id.password);
 
         loginBtn = findViewById(R.id.login);
+        registerBtn = findViewById(R.id.register);
+        resetBtn = findViewById(R.id.resetPass);
         progressBar = findViewById(R.id.progressBar);
     }
 }

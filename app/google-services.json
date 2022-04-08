@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "413585723637",
+    "project_id": "crud-peliculas-1ce5d",
+    "storage_bucket": "crud-peliculas-1ce5d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413585723637:android:002d29cc064ce7b202b5bc",
+        "android_client_info": {
+          "package_name": "com.example.crud_peliculas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413585723637-mg8hqqkr3greaqi2d65uopjoi7r5kgql.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFBT8ocDEXLfI1OdeB0lfb_skurn9Bolw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413585723637-mg8hqqkr3greaqi2d65uopjoi7r5kgql.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

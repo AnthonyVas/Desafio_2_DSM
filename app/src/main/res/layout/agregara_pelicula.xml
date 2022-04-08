@@ -54,6 +54,7 @@
             android:id="@+id/txtRate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="number"
             android:hint="Calificacion (1-4)" />
     </com.google.android.material.textfield.TextInputLayout>
 

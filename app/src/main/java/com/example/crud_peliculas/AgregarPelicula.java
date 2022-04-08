@@ -3,6 +3,7 @@ package com.example.crud_peliculas;
 
 
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.View;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +39,9 @@ public class AgregarPelicula extends AppCompatActivity {
         txtDesc.setText(desc);
         txtRate.setText(rate);
         txtYear.setText(year);
+
+
+        txtRate.setFilters(new InputFilter[]{ new minMax("1", "4")});
 
     }
 
